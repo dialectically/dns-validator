@@ -55,6 +55,12 @@ func main() {
 
 	checkBaseLine()
 
+	outputfile, err := os.OpenFile(outputFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer outputfile.Close()
+
 	rand.Seed(time.Now().UnixNano())
 	jobQueue := make(chan string, 500)
 	resultQueue := make(chan string, 500)
@@ -73,6 +79,14 @@ func main() {
 		wg.Add(1)
 		go worker(jobQueue, resultQueue, &wg)
 	}
+
+	go func() {
+		for s := range resultQueue {
+			//output to file
+			outputfile.WriteString(s + "\n")
+		}
+	}()
+
 	for scanner.Scan() {
 		//rlist = append(rlist, scanner.Text())
 		jobQueue <- scanner.Text()
@@ -80,20 +94,7 @@ func main() {
 
 	close(jobQueue)
 
-	go func() {
-		wg.Wait()
-		close(resultQueue) // Close resultQueue when all workers are done
-	}()
-
-	for s := range resultQueue {
-		//output to file
-		outputfile, err := os.OpenFile(outputFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer outputfile.Close()
-		outputfile.WriteString(s + "\n")
-	}
+	wg.Wait()
 
 }
 
