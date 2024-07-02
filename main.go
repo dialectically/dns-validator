@@ -79,11 +79,11 @@ func main() {
 		wg.Add(1)
 		go worker(jobQueue, resultQueue, &wg)
 	}
-
+	var result []string
 	go func() {
 		for s := range resultQueue {
 			//output to file
-			outputfile.WriteString(s + "\n")
+			result = append(result, s)
 		}
 	}()
 
@@ -93,6 +93,10 @@ func main() {
 	}
 
 	close(jobQueue)
+
+	for _, r := range result {
+		outputfile.WriteString(r + "\n")
+	}
 
 	wg.Wait()
 
