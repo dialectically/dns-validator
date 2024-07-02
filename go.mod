@@ -1,4 +1,4 @@
-module dns-validator
+module github.com/dialectically/dns-validator
 
 go 1.22
 
