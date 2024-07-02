@@ -100,6 +100,7 @@ func main() {
 func worker(jobQueue <-chan string, resultQueue chan string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	c := dns.Client{}
+	c.Timeout = 2 * time.Second
 	for dnsServer := range jobQueue {
 		s := dnsServer
 		now := time.Now()
